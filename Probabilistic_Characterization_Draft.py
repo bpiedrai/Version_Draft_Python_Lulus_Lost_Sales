@@ -21,7 +21,7 @@ from matplotlib import style
 import inspect
 from statsmodels.distributions.empirical_distribution import ECDF
 import warnings
-import snowflake.connector
+import snowflake
 from scipy import stats
 from scipy.stats import betaprime
 from scipy.stats import burr
@@ -96,7 +96,7 @@ def out_rem(data_in, complete_set_data_in):
     if MEDA_abs_des_dio_df != 0:
         out_cri = [(x/MEDA_abs_des_dio_df) for x in abs_des_dio_df]
     else:
-        out_cri = [(x / 0.01) for x in abs_des_dio_df]
+        out_cri = [(x / 2) for x in abs_des_dio_df]
     out_cri_df = pd.DataFrame(out_cri)
     out_cri_idx=out_cri_df[out_cri_df[0]>4.5].index
     if out_cri_idx.size == 0:
@@ -546,7 +546,7 @@ def prob_char_1sku(data, graph_req, info_req, graph_req_ad):
 # The following code should be inactive if input data is read directly from Lulus Snowflake Server.  It includes reading
 # input data from a .csv file.
 
-datos = pd.read_csv('/Users/borispiedra/Documents/Complete_Set_Data_Lost_Sales.csv', delimiter=';',header=None, skiprows=1)
+datos = pd.read_csv('/Users/borispiedra/Version Draft Python Lulus Lost Sales/df.csv', delimiter=';',header=None, skiprows=1)
 #datos = pd.read_csv('/Users/borispiedra/Documents/df19346.csv', delimiter=',',header=None, skiprows=1)
 datos_df = pd.DataFrame(datos)
 
@@ -554,7 +554,7 @@ datos_df = pd.DataFrame(datos)
 # following code should be inactive.  In other case, it should include the fraction to be characterized.
 
 SKU_ID_list = datos_df[2].unique()
-SKU_ID_list = SKU_ID_list[0:40]
+SKU_ID_list = [442,5090,8818,9330,23834,57234,103594,124594,145594,181770,238282,264314,289042,309482,328138,335266,349946,366690,370386,387154,397602,425810,433306,438442,447082,478612,520992,535252,545452,548542]
 
 prob_char_final = []
 prob_char_set = []
@@ -662,8 +662,7 @@ for n in SKU_ID_list:
                 if len(time_demand_ava_wouna)<=59:
                     n_inner_seasons = 1
                     demand_final = time_demand_ava_wouna[1]
-                    char_results = prob_char_1sku(demand_final, 0, 0, 0)
-                    exp_value = char_results['exp_value'][0]
+                    exp_value = time_demand_ava_wouna[1].sum() / len(time_demand_ava_wouna)
                     kon = 0
                     while (exp_value < 0) | (exp_value > 100) | (np.isnan(exp_value)) | (math.isinf(exp_value)):
                         kon += 1
@@ -764,8 +763,11 @@ for n in SKU_ID_list:
                         max_val_ref, complete_data_in_woout = out_rem(data_in, complete_data_in)
                         data_in_2 = complete_data_in_woout[1]
 
-                        char_results = prob_char_1sku(data_in_2, 0, 0, 0)
-                        exp_value = char_results['exp_value'][0]
+                        if len(data_in_2) > 30:
+                            char_results = prob_char_1sku(data_in_2, 0, 0, 0)
+                            exp_value = char_results['exp_value'][0]
+                        else:
+                            exp_value = data_in_2.sum() / len(data_in_2)
                         kon = 0
                         while (exp_value < 0) | (exp_value > 100) | (np.isnan(exp_value)) | (math.isinf(exp_value)):
                             kon += 1
@@ -781,4 +783,4 @@ for n in SKU_ID_list:
     print(prob_char_set)
 
     prob_char_set_df = pd.DataFrame(prob_char_set)
-    prob_char_set_df.to_csv('Prob_Char_Set_Dev_input_test_0-40.csv', index=False)
+    prob_char_set_df.to_csv('/Users/borispiedra/Version Draft Python Lulus Lost Sales/Prob_Char_Set_LSTesting.csv', index=False)
