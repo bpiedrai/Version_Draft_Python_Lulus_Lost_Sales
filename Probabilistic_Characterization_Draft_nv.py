@@ -763,6 +763,9 @@ for n in SKU_ID_list:
                         if len(data_in_2) >= 30:
                             char_results = prob_char_1sku(data_in_2, 0, 0, 0)
                             exp_value = char_results['exp_value'][0]
+                            max_value = data_in_2.max()
+                            if exp_value>max_value:
+                                exp_value = data_in_2.sum()/len(data_in_2)
                         else:
                             exp_value = data_in_2.sum() / len(data_in_2)
                         kon = 0
