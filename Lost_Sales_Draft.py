@@ -5,10 +5,10 @@ import pandas as pd
 # not included, it takes all SKUs available in input data file.
 #
 
-datos = pd.read_csv('/Users/borispiedra/Documents/Sample_Data_Lost_Sales_v3.csv', delimiter=';', header=None)
+datos = pd.read_csv('/Users/borispiedra/370386_mod.csv', delimiter=';', header=None)
 datos_df = pd.DataFrame(datos)
 SKU_list = datos_df[2].unique()
-SKU_list = [258]
+SKU_list = [370386]
 
 
 #
@@ -17,15 +17,16 @@ SKU_list = [258]
 #
 
 
-datos_prob_char = pd.read_csv('/Users/borispiedra/Documents/Prob_Char_Set_V2.csv', delimiter=',',index_col=False)
+datos_prob_char = pd.read_csv('/Users/borispiedra/Version Draft Python Lulus Lost Sales/Prob_Char_Set_LSTesting.csv', delimiter=',',index_col=False)
 datos_prob_char_df = pd.DataFrame(datos_prob_char)
 
 #
 # Definition of the time period for lost sales calculation
 #
 
-initial_date = 6176
-final_date =6207
+initial_date = 6088
+final_date = 6117
+
 
 lost_sales_set = []
 lost_sales_SKU = 0
@@ -34,9 +35,12 @@ lost_sales_SKU = 0
 # Calculation of lost sales for each sku in SKU_list
 #
 
+
+
 for i in SKU_list:
     ind_SKU = datos_df[datos_df[2]==i].index
     datos_SKU = datos_df.iloc[ind_SKU].reset_index(drop=True)
+
     extent_SKU = datos_SKU[1].iloc[len(datos_SKU) - 1] - datos_SKU[1].iloc[0] + 1
 
     demand_original = [0] * extent_SKU
@@ -132,7 +136,7 @@ for i in SKU_list:
 
 lost_sales_set = pd.DataFrame(lost_sales_set)
 print('lost_sales_set=', lost_sales_set)
-lost_sales_set.to_csv('Lost_Sales_2022.csv')
+lost_sales_set.to_csv('/Users/borispiedra/Version Draft Python Lulus Lost Sales/Lost_Sales_LSTesting_370386_P2_Ori.csv')
 
 
 
