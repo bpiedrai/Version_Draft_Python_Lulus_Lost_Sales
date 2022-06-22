@@ -659,14 +659,11 @@ for n in SKU_ID_list:
                 prev_prob_char.extend([sales_seasons_limits[i][0],sales_seasons_limits[i][1],daily_exp_val])
                 n_prob_char_seas += 1
             else:
-                if len(time_demand_ava_wouna)<=59:
+                if len(time_demand_ava_wouna)<=29:
                     n_inner_seasons = 1
                     demand_final = time_demand_ava_wouna[1]
                     exp_value = time_demand_ava_wouna[1].sum() / len(time_demand_ava_wouna)
                     kon = 0
-                    while (exp_value < 0) | (exp_value > 100) | (np.isnan(exp_value)) | (math.isinf(exp_value)):
-                        kon += 1
-                        exp_value = char_results['exp_value'][kon]
                     prev_prob_char.extend([sales_seasons_limits[i][0], sales_seasons_limits[i][1], exp_value])
                     n_prob_char_seas += 1
                 else:
@@ -763,7 +760,7 @@ for n in SKU_ID_list:
                         max_val_ref, complete_data_in_woout = out_rem(data_in, complete_data_in)
                         data_in_2 = complete_data_in_woout[1]
 
-                        if len(data_in_2) > 30:
+                        if len(data_in_2) >= 30:
                             char_results = prob_char_1sku(data_in_2, 0, 0, 0)
                             exp_value = char_results['exp_value'][0]
                         else:
