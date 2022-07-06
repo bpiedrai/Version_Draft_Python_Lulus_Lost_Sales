@@ -104,7 +104,7 @@ def out_rem(data_in, complete_set_data_in):
         complete_set_data_in_woout = complete_set_data_in
     else:
         min_out = data_in_ord[out_cri_idx[0]]
-        out_idx=complete_set_data_in[complete_set_data_in[1]>min_out].index
+        out_idx=complete_set_data_in[complete_set_data_in[1]>=min_out].index
         complete_set_data_in_woout = complete_set_data_in.drop(out_idx).reset_index(drop=True)
         max_val_ref = complete_set_data_in_woout[1].max()
     return max_val_ref, complete_set_data_in_woout
@@ -554,8 +554,8 @@ datos_df = pd.DataFrame(datos)
 # following code should be inactive.  In other case, it should include the fraction to be characterized.
 
 SKU_ID_list = datos_df[2].unique()
-SKU_ID_list = [442,5090,8818,9330,23834,57234,103594,124594,145594,181770,238282,264314,289042,309482,328138,335266,349946,366690,370386,387154,397602,425810,433306,438442,447082,478612,520992,535252,545452,548542]
-
+#SKU_ID_list = [442,5090,8818,9330,23834,57234,103594,124594,145594,181770,238282,264314,289042,309482,328138,335266,349946,366690,370386,387154,397602,425810,433306,438442,447082,478612,520992,533762,533872,535242]
+SKU_ID_list = [350346]
 prob_char_final = []
 prob_char_set = []
 cont = 0
@@ -672,7 +672,7 @@ for n in SKU_ID_list:
                     max_val_ref, time_demand_ava_woout = out_rem(demand_nv, time_demand_ava_wouna)
                     weekly_ave_demand = [time_demand_ava_wouna[1].iloc[k:k + 7].mean() for k in range(len(time_demand_ava_wouna) - 6)]
                     weekly_ave_demand_df = pd.DataFrame(weekly_ave_demand)
-                    lowest_idx = weekly_ave_demand_df[weekly_ave_demand_df[0] < (max_val_ref / 7.5)].index
+                    lowest_idx = weekly_ave_demand_df[weekly_ave_demand_df[0] < (max_val_ref / 5.25)].index
                     mark = 0
                     n_limits=0
                     if len(lowest_idx)>0:
@@ -772,6 +772,8 @@ for n in SKU_ID_list:
                         while (exp_value < 0) | (exp_value > 100) | (np.isnan(exp_value)) | (math.isinf(exp_value)):
                             kon += 1
                             exp_value = char_results['exp_value'][kon]
+                        if exp_value > max_value:
+                            exp_value = data_in_2.sum() / len(data_in_2)
                         prev_prob_char.extend([inner_seasons[k][0], inner_seasons[k][1], exp_value])
                         n_prob_char_seas += 1
 
@@ -783,4 +785,4 @@ for n in SKU_ID_list:
     print(prob_char_set)
 
     prob_char_set_df = pd.DataFrame(prob_char_set)
-    prob_char_set_df.to_csv('/Users/borispiedra/Version Draft Python Lulus Lost Sales/Prob_Char_Set_LSTesting_nv.csv', index=False)
+    prob_char_set_df.to_csv('/Users/borispiedra/Version Draft Python Lulus Lost Sales/Prob_Char_Set_LSTesting_nv3_LV_7.5_5.25_350346.csv', index=False)
