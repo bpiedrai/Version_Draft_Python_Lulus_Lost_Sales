@@ -5,10 +5,10 @@ import pandas as pd
 # not included, it takes all SKUs available in input data file.
 #
 
-datos = pd.read_csv('/Users/borispiedra/370386_mod.csv', delimiter=';', header=None)
+datos = pd.read_csv('/Users/borispiedra/533762_mod4.csv', delimiter=';', header=None)
 datos_df = pd.DataFrame(datos)
 SKU_list = datos_df[2].unique()
-SKU_list = [370386]
+SKU_list = [533762]
 
 
 #
@@ -17,15 +17,15 @@ SKU_list = [370386]
 #
 
 
-datos_prob_char = pd.read_csv('/Users/borispiedra/Version Draft Python Lulus Lost Sales/Prob_Char_Set_LSTesting.csv', delimiter=',',index_col=False)
+datos_prob_char = pd.read_csv('/Users/borispiedra/Version Draft Python Lulus Lost Sales/Prob_Char_Set_LSTesting_nv3_LV_7.5_5.25.csv', delimiter=',',index_col=False)
 datos_prob_char_df = pd.DataFrame(datos_prob_char)
 
 #
 # Definition of the time period for lost sales calculation
 #
 
-initial_date = 6088
-final_date = 6117
+initial_date = 5873
+final_date = 5992
 
 
 lost_sales_set = []
@@ -136,7 +136,7 @@ for i in SKU_list:
 
 lost_sales_set = pd.DataFrame(lost_sales_set)
 print('lost_sales_set=', lost_sales_set)
-lost_sales_set.to_csv('/Users/borispiedra/Version Draft Python Lulus Lost Sales/Lost_Sales_LSTesting_370386_P2_Ori.csv')
+lost_sales_set.to_csv('/Users/borispiedra/Version Draft Python Lulus Lost Sales/Lost_Sales_LSTesting_533762_P2_t4.csv')
 
 
 

@@ -21,7 +21,7 @@ from matplotlib import style
 import inspect
 from statsmodels.distributions.empirical_distribution import ECDF
 import warnings
-import snowflake.connector
+import snowflake
 from scipy import stats
 from scipy.stats import betaprime
 from scipy.stats import burr
@@ -96,7 +96,7 @@ def out_rem(data_in, complete_set_data_in):
     if MEDA_abs_des_dio_df != 0:
         out_cri = [(x/MEDA_abs_des_dio_df) for x in abs_des_dio_df]
     else:
-        out_cri = [(x / 0.01) for x in abs_des_dio_df]
+        out_cri = [(x / 2) for x in abs_des_dio_df]
     out_cri_df = pd.DataFrame(out_cri)
     out_cri_idx=out_cri_df[out_cri_df[0]>4.5].index
     if out_cri_idx.size == 0:
@@ -104,7 +104,7 @@ def out_rem(data_in, complete_set_data_in):
         complete_set_data_in_woout = complete_set_data_in
     else:
         min_out = data_in_ord[out_cri_idx[0]]
-        out_idx=complete_set_data_in[complete_set_data_in[1]>min_out].index
+        out_idx=complete_set_data_in[complete_set_data_in[1]>=min_out].index
         complete_set_data_in_woout = complete_set_data_in.drop(out_idx).reset_index(drop=True)
         max_val_ref = complete_set_data_in_woout[1].max()
     return max_val_ref, complete_set_data_in_woout
@@ -546,7 +546,7 @@ def prob_char_1sku(data, graph_req, info_req, graph_req_ad):
 # The following code should be inactive if input data is read directly from Lulus Snowflake Server.  It includes reading
 # input data from a .csv file.
 
-datos = pd.read_csv('/Users/borispiedra/Documents/Version Draft Python Lulus Lost Sales/Complete_Set_Data_Lost_Sales.csv', delimiter=';',header=None, skiprows=1)
+datos = pd.read_csv('/Users/borispiedra/Version Draft Python Lulus Lost Sales/df.csv', delimiter=';',header=None, skiprows=1)
 #datos = pd.read_csv('/Users/borispiedra/Documents/df19346.csv', delimiter=',',header=None, skiprows=1)
 datos_df = pd.DataFrame(datos)
 
@@ -554,8 +554,8 @@ datos_df = pd.DataFrame(datos)
 # following code should be inactive.  In other case, it should include the fraction to be characterized.
 
 SKU_ID_list = datos_df[2].unique()
-SKU_ID_list = SKU_ID_list[0:40]
-
+#SKU_ID_list = [442,5090,8818,9330,23834,57234,103594,124594,145594,181770,238282,264314,289042,309482,328138,335266,349946,366690,370386,387154,397602,425810,433306,438442,447082,478612,520992,533762,533872,535242]
+SKU_ID_list = [350346]
 prob_char_final = []
 prob_char_set = []
 cont = 0
@@ -659,15 +659,11 @@ for n in SKU_ID_list:
                 prev_prob_char.extend([sales_seasons_limits[i][0],sales_seasons_limits[i][1],daily_exp_val])
                 n_prob_char_seas += 1
             else:
-                if len(time_demand_ava_wouna)<=59:
+                if len(time_demand_ava_wouna)<=29:
                     n_inner_seasons = 1
                     demand_final = time_demand_ava_wouna[1]
-                    char_results = prob_char_1sku(demand_final, 0, 0, 0)
-                    exp_value = char_results['exp_value'][0]
+                    exp_value = time_demand_ava_wouna[1].sum() / len(time_demand_ava_wouna)
                     kon = 0
-                    while (exp_value < 0) | (exp_value > 100) | (np.isnan(exp_value)) | (math.isinf(exp_value)):
-                        kon += 1
-                        exp_value = char_results['exp_value'][kon]
                     prev_prob_char.extend([sales_seasons_limits[i][0], sales_seasons_limits[i][1], exp_value])
                     n_prob_char_seas += 1
                 else:
@@ -676,7 +672,7 @@ for n in SKU_ID_list:
                     max_val_ref, time_demand_ava_woout = out_rem(demand_nv, time_demand_ava_wouna)
                     weekly_ave_demand = [time_demand_ava_wouna[1].iloc[k:k + 7].mean() for k in range(len(time_demand_ava_wouna) - 6)]
                     weekly_ave_demand_df = pd.DataFrame(weekly_ave_demand)
-                    lowest_idx = weekly_ave_demand_df[weekly_ave_demand_df[0] < (max_val_ref / 7.5)].index
+                    lowest_idx = weekly_ave_demand_df[weekly_ave_demand_df[0] < (max_val_ref / 5.25)].index
                     mark = 0
                     n_limits=0
                     if len(lowest_idx)>0:
@@ -764,12 +760,20 @@ for n in SKU_ID_list:
                         max_val_ref, complete_data_in_woout = out_rem(data_in, complete_data_in)
                         data_in_2 = complete_data_in_woout[1]
 
-                        char_results = prob_char_1sku(data_in_2, 0, 0, 0)
-                        exp_value = char_results['exp_value'][0]
+                        if len(data_in_2) >= 30:
+                            char_results = prob_char_1sku(data_in_2, 0, 0, 0)
+                            exp_value = char_results['exp_value'][0]
+                            max_value = data_in_2.max()
+                            if exp_value>max_value:
+                                exp_value = data_in_2.sum()/len(data_in_2)
+                        else:
+                            exp_value = data_in_2.sum() / len(data_in_2)
                         kon = 0
                         while (exp_value < 0) | (exp_value > 100) | (np.isnan(exp_value)) | (math.isinf(exp_value)):
                             kon += 1
                             exp_value = char_results['exp_value'][kon]
+                        if exp_value > max_value:
+                            exp_value = data_in_2.sum() / len(data_in_2)
                         prev_prob_char.extend([inner_seasons[k][0], inner_seasons[k][1], exp_value])
                         n_prob_char_seas += 1
 
@@ -781,4 +785,4 @@ for n in SKU_ID_list:
     print(prob_char_set)
 
     prob_char_set_df = pd.DataFrame(prob_char_set)
-    prob_char_set_df.to_csv('442.csv', index=False)
+    prob_char_set_df.to_csv('/Users/borispiedra/Version Draft Python Lulus Lost Sales/Prob_Char_Set_LSTesting_nv3_LV_7.5_5.25_350346.csv', index=False)
